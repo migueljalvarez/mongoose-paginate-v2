@@ -39,6 +39,7 @@ const defaultOptions = {
   projection: {},
   select: '',
   options: {},
+  customFind: 'find',
 };
 
 function paginate(query, options, callback) {
@@ -57,6 +58,7 @@ function paginate(query, options, callback) {
     projection,
     select,
     sort,
+    customFind,
   } = options;
 
   const customLabels = {
@@ -104,7 +106,7 @@ function paginate(query, options, callback) {
   const countPromise = this.countDocuments(query).exec();
 
   if (limit) {
-    const mQuery = this.find(query, projection, findOptions);
+    const mQuery = this[customFind](query, projection, findOptions);
     mQuery.select(select);
     mQuery.sort(sort);
     mQuery.lean(lean);

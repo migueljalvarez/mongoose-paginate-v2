@@ -54,7 +54,8 @@ var defaultOptions = {
   projection: {},
   select: '',
   options: {},
-  customFind: 'find'
+  customFind: 'find',
+  customCount: 'countDocuments'
 };
 
 function paginate(query, options, callback) {
@@ -68,7 +69,8 @@ function paginate(query, options, callback) {
       projection = _options.projection,
       select = _options.select,
       sort = _options.sort,
-      customFind = _options.customFind;
+      customFind = _options.customFind,
+      customCount = _options.customCount;
 
   var customLabels = _objectSpread({}, defaultOptions.customLabels, {}, options.customLabels);
 
@@ -105,7 +107,7 @@ function paginate(query, options, callback) {
     skip = offset;
   }
 
-  var countPromise = this.countDocuments(query).exec();
+  var countPromise = this[customCount](query).exec();
 
   if (limit) {
     var mQuery = this[customFind](query, projection, findOptions);

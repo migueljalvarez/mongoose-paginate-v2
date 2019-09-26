@@ -139,7 +139,12 @@ function paginate(query, options, callback) {
 
   return Promise.all([countPromise, docsPromise])
     .then((values) => {
-      const [count, docs] = values;
+
+      // const [count, docs] = values;
+
+      const count = values[0].length;
+      const docs = values[1];
+
       const meta = {
         [labelTotal]: count,
         [labelLimit]: limit

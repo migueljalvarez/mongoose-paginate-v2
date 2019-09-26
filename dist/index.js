@@ -132,6 +132,13 @@ function paginate(query, options, callback) {
     // const [count, docs] = values;
     var count = values[0].length;
     var docs = values[1];
+
+    if (populate && typeof populate === 'object') {
+      for (var i = 0; i < docs.length; i++) {
+        docs[i][populate.path] = paginatePopulate(docs[i][populate.path], options.populateOptions[populate.path]);
+      }
+    }
+
     var meta = {
       [labelTotal]: count,
       [labelLimit]: limit
@@ -184,6 +191,70 @@ function paginate(query, options, callback) {
   }).catch(function (error) {
     return isCallbackSpecified ? callback(error) : Promise.reject(error);
   });
+}
+
+function paginatePopulate() {
+  var populateArray = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      _ref$limit = _ref.limit,
+      limit = _ref$limit === void 0 ? 10 : _ref$limit,
+      _ref$offset = _ref.offset,
+      offset = _ref$offset === void 0 ? 0 : _ref$offset;
+
+  var customLabels = _objectSpread({}, defaultOptions.customLabels);
+
+  var labelDocs = customLabels.docs;
+  var labelLimit = customLabels.limit;
+  var labelNextPage = customLabels.nextPage;
+  var labelPage = customLabels.page;
+  var labelPagingCounter = customLabels.pagingCounter;
+  var labelPrevPage = customLabels.prevPage;
+  var labelTotal = customLabels.totalDocs;
+  var labelTotalPages = customLabels.totalPages;
+  var labelHasPrevPage = customLabels.hasPrevPage;
+  var labelHasNextPage = customLabels.hasNextPage;
+  var labelMeta = customLabels.meta;
+  var paginated = paginator(populateArray, offset, limit);
+  var count = paginated.totalDocs;
+  var docs = paginated.docs;
+  var meta = {
+    [labelTotal]: count,
+    [labelLimit]: limit
+  };
+  var result = {};
+
+  if (typeof offset !== 'undefined') {
+    meta.offset = offset;
+  } // Remove customLabels set to false
+
+
+  delete meta['false'];
+
+  if (labelMeta) {
+    result = {
+      [labelDocs]: docs,
+      [labelMeta]: meta
+    };
+  } else {
+    result = _objectSpread({
+      [labelDocs]: docs
+    }, meta);
+  }
+
+  return result;
+}
+
+function paginator() {
+  var items = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+  var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  var limit = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 10;
+  return {
+    limit,
+    offset,
+    totalDocs: items.length,
+    docs: items.slice(offset).slice(0, limit)
+  };
 }
 /**
  * @param {Schema} schema

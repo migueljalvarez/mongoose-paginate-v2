@@ -143,6 +143,12 @@ function paginate(query, options, callback) {
       const count = values[0].length;
       const docs = values[1];
 
+      if(populate && typeof populate === 'object') {
+        for (let i = 0; i < docs.length; i++) {
+          docs[i][populate.path] = paginatePopulate(docs[i][populate.path], options.populateOptions[populate.path]);
+        }
+      }
+
       const meta = {
         [labelTotal]: count,
         [labelLimit]: limit
@@ -199,6 +205,65 @@ function paginate(query, options, callback) {
     }).catch((error) => {
       return isCallbackSpecified ? callback(error) : Promise.reject(error);
     });
+}
+
+function paginatePopulate(populateArray = [], {
+  limit = 10,
+  offset = 0,
+} = {}) {
+  const customLabels = {
+    ...defaultOptions.customLabels,
+  };
+
+  const labelDocs = customLabels.docs;
+  const labelLimit = customLabels.limit;
+  const labelNextPage = customLabels.nextPage;
+  const labelPage = customLabels.page;
+  const labelPagingCounter = customLabels.pagingCounter;
+  const labelPrevPage = customLabels.prevPage;
+  const labelTotal = customLabels.totalDocs;
+  const labelTotalPages = customLabels.totalPages;
+  const labelHasPrevPage = customLabels.hasPrevPage;
+  const labelHasNextPage = customLabels.hasNextPage;
+  const labelMeta = customLabels.meta;
+  const paginated = paginator(populateArray, offset, limit);
+  const count = paginated.totalDocs;
+  const docs = paginated.docs;
+  const meta = {
+    [labelTotal]: count,
+    [labelLimit]: limit
+  };
+  let result = {};
+
+  if (typeof offset !== 'undefined') {
+    meta.offset = offset;
+  }
+
+  // Remove customLabels set to false
+  delete meta['false'];
+
+  if (labelMeta) {
+    result = {
+      [labelDocs]: docs,
+      [labelMeta]: meta
+    };
+  } else {
+    result = {
+      [labelDocs]: docs,
+      ...meta
+    };
+  }
+
+  return result;
+}
+
+function paginator(items = [], offset = 0, limit = 10) {
+  return {
+    limit,
+    offset,
+    totalDocs: items.length,
+    docs: items.slice(offset).slice(0, limit),
+  };
 }
 
 /**

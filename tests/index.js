@@ -4,7 +4,7 @@ let mongoose = require('mongoose');
 let expect = require('chai').expect;
 let mongoosePaginate = require('../dist/index');
 
-let MONGO_URI = 'mongodb://localhost/mongoose_paginate_test';
+let MONGO_URI = 'mongodb://localhost/mongoose_paginate_test?authsource=admin';
 
 let AuthorSchema = new mongoose.Schema({
   name: String
@@ -34,7 +34,13 @@ describe('mongoose-paginate', function () {
 
   before(function (done) {
     mongoose.connect(MONGO_URI, {
-      useNewUrlParser: true
+      auth: {
+        user: 'root',
+        password: 'example',
+      },
+      useNewUrlParser: true,
+      useCreateIndex: true,
+      useUnifiedTopology: true,
     }, done);
   });
 
@@ -302,8 +308,11 @@ describe('mongoose-paginate', function () {
       },
       customLabels: myCustomLabels
     };
-    return Book.paginate(query, options).then((result) => {
-      expect(result.meta.total).to.equal(100);
+
+    return Book.createIndexes().then(() => {
+      return Book.paginate(query, options).then((result) => {
+        expect(result.meta.total).to.equal(100);
+      });
     });
   });
 

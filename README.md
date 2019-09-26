@@ -227,6 +227,37 @@ Model.paginate().then(function(result) {
 });
 ```
 
+## Development (WIP)
+
+First, setup a MongoDB instance with Docker:
+
+```sh
+docker run \
+  --name mongoose-paginate-tests \
+  --publish "27017:27017" \
+  -e MONGO_INITDB_ROOT_USERNAME=root \
+  -e MONGO_INITDB_ROOT_PASSWORD=example \
+  -d mongo:4.2
+```
+
+Then, run:
+
+```sh
+npm install
+```
+
+Run tests:
+
+```sh
+npm test
+```
+
+Delete container when development is done:
+
+```sh
+docker container rm --force mongoose-paginate-tests
+```
+
 ## License
 
 [MIT](LICENSE)

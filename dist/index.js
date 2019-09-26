@@ -1,13 +1,5 @@
 "use strict";
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-
-function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -54,8 +46,7 @@ var defaultOptions = {
   projection: {},
   select: '',
   options: {},
-  customFind: 'find',
-  customCount: 'countDocuments'
+  customFind: 'find'
 };
 
 function paginate(query, options, callback) {
@@ -69,8 +60,7 @@ function paginate(query, options, callback) {
       projection = _options.projection,
       select = _options.select,
       sort = _options.sort,
-      customFind = _options.customFind,
-      customCount = _options.customCount;
+      customFind = _options.customFind;
 
   var customLabels = _objectSpread({}, defaultOptions.customLabels, {}, options.customLabels);
 
@@ -107,7 +97,7 @@ function paginate(query, options, callback) {
     skip = offset;
   }
 
-  var countPromise = this[customCount](query).exec();
+  var countPromise = this[customFind](query).exec();
 
   if (limit) {
     var mQuery = this[customFind](query, projection, findOptions);
@@ -139,10 +129,9 @@ function paginate(query, options, callback) {
   }
 
   return Promise.all([countPromise, docsPromise]).then(function (values) {
-    var _values = _slicedToArray(values, 2),
-        count = _values[0],
-        docs = _values[1];
-
+    // const [count, docs] = values;
+    var count = values[0].length;
+    var docs = values[1];
     var meta = {
       [labelTotal]: count,
       [labelLimit]: limit

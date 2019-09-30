@@ -76,7 +76,6 @@ function paginate(query, options, callback) {
   let skip;
 
   let docsPromise = [];
-  let docs = [];
 
   // Labels
   const labelDocs = customLabels.docs;
@@ -91,10 +90,10 @@ function paginate(query, options, callback) {
   const labelHasNextPage = customLabels.hasNextPage;
   const labelMeta = customLabels.meta;
 
-  if (options.hasOwnProperty('offset')) {
+  if (Object.prototype.hasOwnProperty.call(options, 'offset')) {
     offset = parseInt(options.offset, 10);
     skip = offset;
-  } else if (options.hasOwnProperty('page')) {
+  } else if (Object.prototype.hasOwnProperty.call(options, 'page')) {
     page = parseInt(options.page, 10);
     skip = (page - 1) * limit;
   } else {
@@ -143,20 +142,31 @@ function paginate(query, options, callback) {
       const count = values[0].length;
       const docs = values[1];
 
-      if(populate && typeof populate === 'object') {
+      if(populate && Array.isArray(populate)) {
+        for (let j = 0; j < docs.length; j++) {
+          for (let i = 0; i < populate.length; i++) {
+            if (populate[i] && populate[i].path && !this.schema.virtuals[populate[i].path].options.justOne) {
+              const documentObject = docs[j].toObject();
+              documentObject[populate[i].path] = undefined;
+              documentObject[populate[i].path] = paginatePopulate(docs[j][populate[i].path], options.populateOptions && options.populateOptions[populate[i].path]);
+              docs[j] = documentObject;
+            }
+          }
+        }
+      } else if(populate && typeof populate === 'object') {
         for (let i = 0; i < docs.length; i++) {
-          docs[i][populate.path] = paginatePopulate(docs[i][populate.path], options.populateOptions[populate.path]);
+          docs[i][populate.path] = paginatePopulate(docs[i][populate.path], options.populateOptions && options.populateOptions[populate.path]);
         }
       }
 
       const meta = {
         [labelTotal]: count,
-        [labelLimit]: limit
+        [labelLimit]: parseInt(limit, 10),
       };
       let result = {};
 
       if (typeof offset !== 'undefined') {
-        meta.offset = offset;
+        meta.offset = parseInt(offset, 10);
       }
 
       if (typeof page !== 'undefined') {
@@ -200,7 +210,6 @@ function paginate(query, options, callback) {
           ...meta
         };
       }
-
       return isCallbackSpecified ? callback(null, result) : Promise.resolve(result);
     }).catch((error) => {
       return isCallbackSpecified ? callback(error) : Promise.reject(error);
@@ -217,26 +226,19 @@ function paginatePopulate(populateArray = [], {
 
   const labelDocs = customLabels.docs;
   const labelLimit = customLabels.limit;
-  const labelNextPage = customLabels.nextPage;
-  const labelPage = customLabels.page;
-  const labelPagingCounter = customLabels.pagingCounter;
-  const labelPrevPage = customLabels.prevPage;
   const labelTotal = customLabels.totalDocs;
-  const labelTotalPages = customLabels.totalPages;
-  const labelHasPrevPage = customLabels.hasPrevPage;
-  const labelHasNextPage = customLabels.hasNextPage;
   const labelMeta = customLabels.meta;
   const paginated = paginator(populateArray, offset, limit);
   const count = paginated.totalDocs;
   const docs = paginated.docs;
   const meta = {
     [labelTotal]: count,
-    [labelLimit]: limit
+    [labelLimit]: parseInt(limit, 10),
   };
   let result = {};
 
   if (typeof offset !== 'undefined') {
-    meta.offset = offset;
+    meta.offset = parseInt(offset, 10);
   }
 
   // Remove customLabels set to false
@@ -253,15 +255,14 @@ function paginatePopulate(populateArray = [], {
       ...meta
     };
   }
-
   return result;
 }
 
 function paginator(items = [], offset = 0, limit = 10) {
   return {
-    limit,
-    offset,
-    totalDocs: items.length,
+    limit: parseInt(limit, 10),
+    offset: parseInt(offset, 10),
+    totalDocs: parseInt(items.length, 10),
     docs: items.slice(offset).slice(0, limit),
   };
 }

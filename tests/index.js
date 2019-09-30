@@ -370,17 +370,10 @@ describe('mongoose-paginate', function () {
       };
 
       return Author.paginate(query, options).then((result) => {
-        const util = require('util')
-        console.log(
-          util.inspect(result, {
-            showHidden: false,
-            depth: 4,
-            compact: false,
-            colors: true,
-          }),
-        )
-        // expect(result.docs).to.have.length(2);
-        // expect(result.totalDocs).to.equal(1);
+        expect(result.docs).to.have.length(1);
+        expect(result.totalDocs).to.equal(2);
+        expect(result.docs[0].books.docs).to.have.length(2);
+        expect(result.docs[0].books.totalDocs).to.equal(10);
       });
   });
 

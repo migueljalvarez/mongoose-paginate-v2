@@ -9,6 +9,15 @@ let MONGO_URI = 'mongodb://localhost/mongoose_paginate_test?authsource=admin';
 let AuthorSchema = new mongoose.Schema({
   name: String
 });
+
+AuthorSchema.virtual('books', {
+  ref: 'Book',
+  localField: '_id',
+  foreignField: 'author',
+});
+
+AuthorSchema.plugin(mongoosePaginate);
+
 let Author = mongoose.model('Author', AuthorSchema);
 
 let BookSchema = new mongoose.Schema({
@@ -69,10 +78,28 @@ describe('mongoose-paginate', function () {
         });
         books.push(book);
       }
-
       return Book.create(books);
+    }).then(() => {
+      return Author.create({
+        name: 'William Faulkner'
+      }).then(function (author) {
+        for (let i = 1; i <= 10; i++) {
+          book = new Book({
+            // price: Math.floor(Math.random() * (1000 - 50) ) + 50,
+            price: (i * 5) + i,
+            title: 'Book #' + i,
+            date: new Date(date.getTime() + i),
+            author: author._id,
+            loc: {
+              type: "Point",
+              coordinates: [-10.97, 20.77]
+            },
+          });
+          books.push(book);
+        }
+        return Book.create(books);
+      })
     });
-
   });
 
   afterEach(function () {
@@ -112,10 +139,9 @@ describe('mongoose-paginate', function () {
         },
         lean: true
       };
-
       return Book.paginate(query, options).then((result) => {
         expect(result.docs).to.have.length(0);
-        expect(result.totalDocs).to.equal(12);
+        expect(result.totalDocs).to.equal(14);
         expect(result.limit).to.equal(0);
         expect(result.page).to.equal(1);
         expect(result.pagingCounter).to.equal(1);
@@ -184,13 +210,13 @@ describe('mongoose-paginate', function () {
 
         expect(result.docs).to.have.length(10);
         expect(result.docs[0].title).to.equal('Book #41');
-        expect(result.totalDocs).to.equal(100);
+        expect(result.totalDocs).to.equal(110);
         expect(result.limit).to.equal(10);
         expect(result.page).to.equal(5);
         expect(result.pagingCounter).to.equal(41);
         expect(result.hasPrevPage).to.equal(true);
         expect(result.hasNextPage).to.equal(true);
-        expect(result.totalPages).to.equal(10);
+        expect(result.totalPages).to.equal(11);
         expect(result.prevPage).to.equal(undefined);
         expect(result.nextPage).to.equal(undefined);
       });
@@ -231,7 +257,7 @@ describe('mongoose-paginate', function () {
       return Book.paginate(query, options).then((result) => {
         expect(result.itemsList).to.have.length(10);
         expect(result.itemsList[0].title).to.equal('Book #41');
-        expect(result.itemCount).to.equal(100);
+        expect(result.itemCount).to.equal(110);
         expect(result.perPage).to.equal(10);
         expect(result.currentPage).to.equal(5);
         expect(result.pageCounter).to.equal(41);
@@ -239,7 +265,7 @@ describe('mongoose-paginate', function () {
         expect(result.hasNext).to.equal(true);
         expect(result.prev).to.equal(4);
         expect(result.next).to.equal(6);
-        expect(result.pageCount).to.equal(10);
+        expect(result.pageCount).to.equal(11);
       });
     });
   });
@@ -273,7 +299,7 @@ describe('mongoose-paginate', function () {
       expect(result.itemsList).to.have.length(10);
       expect(result.itemsList[0].title).to.equal('Book #41');
       expect(result.meta).to.be.an.instanceOf(Object);
-      expect(result.meta.total).to.equal(100);
+      expect(result.meta.total).to.equal(110);
     });
   });
 
@@ -311,9 +337,44 @@ describe('mongoose-paginate', function () {
 
     return Book.createIndexes().then(() => {
       return Book.paginate(query, options).then((result) => {
-        expect(result.meta.total).to.equal(100);
+        expect(result.meta.total).to.equal(110);
       });
     });
+  });
+
+  it('with populate', function () {
+      var query = {};
+
+      var options = {
+        limit: 1,
+        offset: 1,
+        collation: {
+          locale: 'en',
+          strength: 2
+        },
+        populate: {
+          path: 'books',
+          options: {
+            sort: {
+              _id: 1
+            },
+          },
+        },
+        populateOptions: {
+          books: {
+            limit: 3,
+            offset: 8,
+          },
+        },
+        lean: true
+      };
+
+      return Author.paginate(query, options).then((result) => {
+        expect(result.docs).to.have.length(1);
+        expect(result.totalDocs).to.equal(2);
+        expect(result.docs[0].books.docs).to.have.length(2);
+        expect(result.docs[0].books.totalDocs).to.equal(10);
+      });
   });
 
   after(function (done) {

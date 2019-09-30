@@ -50,6 +50,8 @@ var defaultOptions = {
 };
 
 function paginate(query, options, callback) {
+  var _this = this;
+
   options = _objectSpread({}, defaultOptions, {}, paginate.options, {}, options);
   query = query || {};
   var _options = options,
@@ -70,8 +72,7 @@ function paginate(query, options, callback) {
   var offset;
   var page;
   var skip;
-  var docsPromise = [];
-  var docs = []; // Labels
+  var docsPromise = []; // Labels
 
   var labelDocs = customLabels.docs;
   var labelLimit = customLabels.limit;
@@ -85,10 +86,10 @@ function paginate(query, options, callback) {
   var labelHasNextPage = customLabels.hasNextPage;
   var labelMeta = customLabels.meta;
 
-  if (options.hasOwnProperty('offset')) {
+  if (Object.prototype.hasOwnProperty.call(options, 'offset')) {
     offset = parseInt(options.offset, 10);
     skip = offset;
-  } else if (options.hasOwnProperty('page')) {
+  } else if (Object.prototype.hasOwnProperty.call(options, 'page')) {
     page = parseInt(options.page, 10);
     skip = (page - 1) * limit;
   } else {
@@ -132,14 +133,32 @@ function paginate(query, options, callback) {
     // const [count, docs] = values;
     var count = values[0].length;
     var docs = values[1];
+
+    if (populate && Array.isArray(populate)) {
+      for (var j = 0; j < docs.length; j++) {
+        for (var i = 0; i < populate.length; i++) {
+          if (populate[i] && populate[i].path && !_this.schema.virtuals[populate[i].path].options.justOne) {
+            var documentObject = docs[j].toObject();
+            documentObject[populate[i].path] = undefined;
+            documentObject[populate[i].path] = paginatePopulate(docs[j][populate[i].path], options.populateOptions && options.populateOptions[populate[i].path]);
+            docs[j] = documentObject;
+          }
+        }
+      }
+    } else if (populate && typeof populate === 'object') {
+      for (var _i = 0; _i < docs.length; _i++) {
+        docs[_i][populate.path] = paginatePopulate(docs[_i][populate.path], options.populateOptions && options.populateOptions[populate.path]);
+      }
+    }
+
     var meta = {
       [labelTotal]: count,
-      [labelLimit]: limit
+      [labelLimit]: parseInt(limit, 10)
     };
     var result = {};
 
     if (typeof offset !== 'undefined') {
-      meta.offset = offset;
+      meta.offset = parseInt(offset, 10);
     }
 
     if (typeof page !== 'undefined') {
@@ -184,6 +203,63 @@ function paginate(query, options, callback) {
   }).catch(function (error) {
     return isCallbackSpecified ? callback(error) : Promise.reject(error);
   });
+}
+
+function paginatePopulate() {
+  var populateArray = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      _ref$limit = _ref.limit,
+      limit = _ref$limit === void 0 ? 10 : _ref$limit,
+      _ref$offset = _ref.offset,
+      offset = _ref$offset === void 0 ? 0 : _ref$offset;
+
+  var customLabels = _objectSpread({}, defaultOptions.customLabels);
+
+  var labelDocs = customLabels.docs;
+  var labelLimit = customLabels.limit;
+  var labelTotal = customLabels.totalDocs;
+  var labelMeta = customLabels.meta;
+  var paginated = paginator(populateArray, offset, limit);
+  var count = paginated.totalDocs;
+  var docs = paginated.docs;
+  var meta = {
+    [labelTotal]: count,
+    [labelLimit]: parseInt(limit, 10)
+  };
+  var result = {};
+
+  if (typeof offset !== 'undefined') {
+    meta.offset = parseInt(offset, 10);
+  } // Remove customLabels set to false
+
+
+  delete meta['false'];
+
+  if (labelMeta) {
+    result = {
+      [labelDocs]: docs,
+      [labelMeta]: meta
+    };
+  } else {
+    result = _objectSpread({
+      [labelDocs]: docs
+    }, meta);
+  }
+
+  return result;
+}
+
+function paginator() {
+  var items = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+  var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  var limit = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 10;
+  return {
+    limit: parseInt(limit, 10),
+    offset: parseInt(offset, 10),
+    totalDocs: parseInt(items.length, 10),
+    docs: items.slice(offset).slice(0, limit)
+  };
 }
 /**
  * @param {Schema} schema

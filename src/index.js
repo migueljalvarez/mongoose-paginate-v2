@@ -13,6 +13,7 @@
  * @param {Number}              [options.offset=0] - Use offset or page to set skip position
  * @param {Number}              [options.page=1]
  * @param {Number}              [options.limit=10]
+ * @param {Object}              [options.read={}] - Determines the MongoDB nodes from which to read.
  * @param {Function}            [callback]
  *
  * @returns {Promise}
@@ -39,6 +40,8 @@ const defaultOptions = {
   projection: {},
   select: '',
   options: {},
+  pagination: true,
+  forceCountFn: false
   customFind: 'find',
 };
 
@@ -56,8 +59,11 @@ function paginate(query, options, callback) {
     leanWithId,
     populate,
     projection,
+    read,
     select,
     sort,
+    pagination,
+    forceCountFn
     customFind,
   } = options;
 
@@ -66,7 +72,7 @@ function paginate(query, options, callback) {
     ...options.customLabels
   };
 
-  const limit = parseInt(options.limit, 10) || 0;
+  const limit = parseInt(options.limit, 10) > 0 ? parseInt(options.limit, 10) : 0;
 
   const isCallbackSpecified = typeof callback === 'function';
   const findOptions = options.options;
@@ -102,7 +108,13 @@ function paginate(query, options, callback) {
     skip = offset;
   }
 
-  const countPromise = this[customFind](query).exec();
+  let countPromise;
+
+  if (forceCountFn === true) {
+    countPromise = this.count(query).exec();
+  } else {
+    countPromise = this[customFind](query).exec();
+  }
 
   if (limit) {
     const mQuery = this[customFind](query, projection, findOptions);
@@ -110,16 +122,27 @@ function paginate(query, options, callback) {
     mQuery.sort(sort);
     mQuery.lean(lean);
 
+    if (read && read.pref) {
+      /**
+       * Determines the MongoDB nodes from which to read.
+       * @param read.pref one of the listed preference options or aliases
+       * @param read.tags optional tags for this query
+       */
+      mQuery.read(read.pref, read.tags);
+    }
+
     // Hack for mongo < v3.4
     if (Object.keys(collation).length > 0) {
       mQuery.collation(collation);
     }
 
-    mQuery.skip(skip);
-    mQuery.limit(limit);
-
     if (populate) {
       mQuery.populate(populate);
+    }
+
+    if (pagination) {
+      mQuery.skip(skip);
+      mQuery.limit(limit);
     }
 
     docsPromise = mQuery.exec();
@@ -132,15 +155,13 @@ function paginate(query, options, callback) {
         return docs;
       });
     }
+
   }
 
   return Promise.all([countPromise, docsPromise])
     .then((values) => {
 
-      // const [count, docs] = values;
-
-      const count = values[0].length;
-      const docs = values[1];
+      const [count, docs] = values;
 
       if(populate && Array.isArray(populate)) {
         for (let j = 0; j < docs.length; j++) {
@@ -158,31 +179,42 @@ function paginate(query, options, callback) {
           docs[i][populate.path] = paginatePopulate(docs[i][populate.path], options.populateOptions && options.populateOptions[populate.path]);
         }
       }
-
       const meta = {
-        [labelTotal]: count,
-        [labelLimit]: parseInt(limit, 10),
+        [labelTotal]: count
       };
+
       let result = {};
 
       if (typeof offset !== 'undefined') {
         meta.offset = parseInt(offset, 10);
+        page = Math.ceil((offset + 1) / limit);
       }
 
-      if (typeof page !== 'undefined') {
+      const pages = (limit > 0) ? (Math.ceil(count / limit) || 1) : null;
 
-        const pages = (limit > 0) ? (Math.ceil(count / limit) || 1) : null;
+      // Setting default values
+      meta[labelLimit] = parseInt(count, 10);
+      meta[labelTotalPages] = 1;
+      meta[labelPage] = page;
+      meta[labelPagingCounter] = ((page - 1) * limit) + 1;
 
-        meta[labelHasPrevPage] = false;
-        meta[labelHasNextPage] = false;
-        meta[labelPage] = page;
+      meta[labelHasPrevPage] = false;
+      meta[labelHasNextPage] = false;
+      meta[labelPrevPage] = null;
+      meta[labelNextPage] = null;
+
+      if (pagination) {
+
+        meta[labelLimit] = limit;
         meta[labelTotalPages] = pages;
-        meta[labelPagingCounter] = ((page - 1) * limit) + 1;
 
         // Set prev page
         if (page > 1) {
           meta[labelHasPrevPage] = true;
           meta[labelPrevPage] = (page - 1);
+        } else if (page == 1 && typeof offset !== 'undefined' && offset !== 0) {
+          meta[labelHasPrevPage] = true;
+          meta[labelPrevPage] = 1;
         } else {
           meta[labelPrevPage] = null;
         }
@@ -194,10 +226,22 @@ function paginate(query, options, callback) {
         } else {
           meta[labelNextPage] = null;
         }
+
       }
 
       // Remove customLabels set to false
       delete meta['false'];
+
+      if (limit == 0) {
+        meta[labelLimit] = 0;
+        meta[labelTotalPages] = null;
+        meta[labelPage] = null;
+        meta[labelPagingCounter] = null;
+        meta[labelPrevPage] = null;
+        meta[labelNextPage] = null;
+        meta[labelHasPrevPage] = false;
+        meta[labelHasNextPage] = false;
+      }
 
       if (labelMeta) {
         result = {

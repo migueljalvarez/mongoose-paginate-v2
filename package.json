@@ -5,7 +5,7 @@
 	"main": "dist/index.js",
 	"scripts": {
 		"pretest": "npm run build",
-		"test": "./node_modules/.bin/mocha tests/*.js -R spec --ui bdd --timeout 5000",
+		"test": "./node_modules/.bin/mocha tests/*.js -R spec --ui bdd --timeout 9999999",
 		"build": "babel src -d dist",
 		"prepublish": "npm run test",
 		"lint": "eslint src"
@@ -15,7 +15,7 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/WebGangster/mongoose-paginate-v2.git"
+		"url": "git+https://github.com/davidsierradz/mongoose-paginate-v2.git"
 	},
 	"keywords": [
 		"mongoose",
@@ -32,15 +32,15 @@
 		"paginator",
 		"plugin"
 	],
-	"author": "Aravind NC <aravind_n_c@yahoo.co.in> (http://imwebgangster.com)",
+	"author": "Aravind NC <aravind_n_c@yahoo.co.in> (https://aravindnc.com)",
 	"contributors": [
 		"Fernando López Guevara (fernando.lguevara@gmail.com)"
 	],
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/WebGangster/mongoose-paginate-v2/issues"
+		"url": "https://github.com/davidsierradz/mongoose-paginate-v2/issues"
 	},
-	"homepage": "https://github.com/WebGangster/mongoose-paginate-v2#readme",
+	"homepage": "https://github.com/davidsierradz/mongoose-paginate-v2#readme",
 	"dependencies": {},
 	"devDependencies": {
 		"@babel/cli": "^7.4.3",

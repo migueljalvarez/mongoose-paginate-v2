@@ -37,11 +37,12 @@ const defaultOptions = {
   lean: false,
   leanWithId: true,
   limit: 10,
+  paginatePopulates: false,
   projection: {},
   select: '',
   options: {},
   pagination: true,
-  forceCountFn: false
+  forceCountFn: false,
   customFind: 'find',
 };
 
@@ -58,12 +59,13 @@ function paginate(query, options, callback) {
     lean,
     leanWithId,
     populate,
+    paginatePopulates,
     projection,
     read,
     select,
     sort,
     pagination,
-    forceCountFn
+    forceCountFn,
     customFind,
   } = options;
 
@@ -111,7 +113,7 @@ function paginate(query, options, callback) {
   let countPromise;
 
   if (forceCountFn === true) {
-    countPromise = this.count(query).exec();
+    countPromise = this.estimatedDocumentCount(query).exec();
   } else {
     countPromise = this[customFind](query).exec();
   }
@@ -161,22 +163,27 @@ function paginate(query, options, callback) {
   return Promise.all([countPromise, docsPromise])
     .then((values) => {
 
-      const [count, docs] = values;
+      // const [count, docs] = values;
 
-      if(populate && Array.isArray(populate)) {
-        for (let j = 0; j < docs.length; j++) {
-          for (let i = 0; i < populate.length; i++) {
-            if (populate[i] && populate[i].path && !this.schema.virtuals[populate[i].path].options.justOne) {
-              const documentObject = docs[j].toObject();
-              documentObject[populate[i].path] = undefined;
-              documentObject[populate[i].path] = paginatePopulate(docs[j][populate[i].path], options.populateOptions && options.populateOptions[populate[i].path]);
-              docs[j] = documentObject;
+      const count = values[0].length;
+      const docs = values[1];
+
+      if (paginatePopulates) {
+        if(populate && Array.isArray(populate)) {
+          for (let j = 0; j < docs.length; j++) {
+            for (let i = 0; i < populate.length; i++) {
+              if (populate[i] && populate[i].path && !this.schema.virtuals[populate[i].path].options.justOne) {
+                const documentObject = docs[j].toObject();
+                documentObject[populate[i].path] = undefined;
+                documentObject[populate[i].path] = paginatePopulate(docs[j][populate[i].path], options.populateOptions && options.populateOptions[populate[i].path]);
+                docs[j] = documentObject;
+              }
             }
           }
-        }
-      } else if(populate && typeof populate === 'object') {
-        for (let i = 0; i < docs.length; i++) {
-          docs[i][populate.path] = paginatePopulate(docs[i][populate.path], options.populateOptions && options.populateOptions[populate.path]);
+        } else if(populate && typeof populate === 'object') {
+          for (let i = 0; i < docs.length; i++) {
+            docs[i][populate.path] = paginatePopulate(docs[i][populate.path], options.populateOptions && options.populateOptions[populate.path]);
+          }
         }
       }
       const meta = {

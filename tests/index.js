@@ -119,8 +119,9 @@ describe('mongoose-paginate', function () {
       done();
     });
   });
+});
 
-  describe('paginates', function () {
+describe('paginates', function () {
     it('with limit and page', function () {
       var query = {
         title: {
@@ -143,8 +144,8 @@ describe('mongoose-paginate', function () {
         expect(result.docs).to.have.length(0);
         expect(result.totalDocs).to.equal(14);
         expect(result.limit).to.equal(0);
-        expect(result.page).to.equal(1);
-        expect(result.pagingCounter).to.equal(1);
+        expect(result.page).to.equal(null);
+        expect(result.pagingCounter).to.equal(null);
         expect(result.hasPrevPage).to.equal(false);
         expect(result.hasNextPage).to.equal(false);
         expect(result.prevPage).to.equal(null);
@@ -168,7 +169,7 @@ describe('mongoose-paginate', function () {
 
     return Book.paginate(query, options).then((result) => {
       expect(result.docs).to.have.length(10);
-      expect(result.totalDocs).to.equal(100);
+      expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(10);
       expect(result.page).to.equal(5);
       expect(result.pagingCounter).to.equal(41);
@@ -176,7 +177,7 @@ describe('mongoose-paginate', function () {
       expect(result.hasNextPage).to.equal(true);
       expect(result.prevPage).to.equal(4);
       expect(result.nextPage).to.equal(6);
-      expect(result.totalPages).to.equal(10);
+      expect(result.totalPages).to.equal(11);
     });
   });
  
@@ -195,7 +196,7 @@ describe('mongoose-paginate', function () {
 
     return Book.paginate(query, options).then(result => {
       expect(result.docs).to.have.length(10);
-      expect(result.totalDocs).to.equal(100);
+      expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(10);
       expect(result.page).to.equal(1);
       expect(result.pagingCounter).to.equal(1);
@@ -203,9 +204,9 @@ describe('mongoose-paginate', function () {
       expect(result.hasNextPage).to.equal(true);
       expect(result.prevPage).to.equal(null);
       expect(result.nextPage).to.equal(2);
-      expect(result.totalPages).to.equal(10);
+      expect(result.totalPages).to.equal(11);
     });
-    */
+  });
 
     it('with empty custom labels', function () {
       var query = {
@@ -262,15 +263,15 @@ describe('mongoose-paginate', function () {
 
     return Book.paginate(query, options).then(result => {
 			expect(result.docs).to.have.length(10);
-      expect(result.totalDocs).to.equal(100);
+      expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(10);
       expect(result.page).to.equal(10);
       expect(result.pagingCounter).to.equal(91);
       expect(result.hasPrevPage).to.equal(true);
-      expect(result.hasNextPage).to.equal(false);
+      expect(result.hasNextPage).to.equal(true);
       expect(result.prevPage).to.equal(9);
-      expect(result.nextPage).to.equal(null);
-      expect(result.totalPages).to.equal(10);
+      expect(result.nextPage).to.equal(11);
+      expect(result.totalPages).to.equal(11);
     });
   });
 
@@ -292,16 +293,16 @@ describe('mongoose-paginate', function () {
 
     return Book.paginate(query, options).then((result) => {
 
-      expect(result.docs).to.have.length(2);
-      expect(result.totalDocs).to.equal(100);
+      expect(result.docs).to.have.length(10);
+      expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(10);
       expect(result.page).to.equal(10);
       expect(result.pagingCounter).to.equal(91);
       expect(result.hasPrevPage).to.equal(true);
-      expect(result.hasNextPage).to.equal(false);
+      expect(result.hasNextPage).to.equal(true);
       expect(result.prevPage).to.equal(9);
-      expect(result.nextPage).to.equal(null);
-      expect(result.totalPages).to.equal(10);
+      expect(result.nextPage).to.equal(11);
+      expect(result.totalPages).to.equal(11);
     });
   });
   
@@ -324,7 +325,7 @@ describe('mongoose-paginate', function () {
     return Book.paginate(query, options).then((result) => {
 
       expect(result.docs).to.have.length(10);
-      expect(result.totalDocs).to.equal(100);
+      expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(10);
       expect(result.page).to.equal(1);
       expect(result.pagingCounter).to.equal(1);
@@ -332,7 +333,7 @@ describe('mongoose-paginate', function () {
       expect(result.hasNextPage).to.equal(true);
       expect(result.prevPage).to.equal(1);
       expect(result.nextPage).to.equal(2);
-      expect(result.totalPages).to.equal(10);
+      expect(result.totalPages).to.equal(11);
     });
   });
 
@@ -358,7 +359,7 @@ describe('mongoose-paginate', function () {
     return Book.paginate(query, options).then((result) => {
 
       expect(result.docs).to.have.length(0);
-      expect(result.totalDocs).to.equal(12);
+      expect(result.totalDocs).to.equal(14);
       expect(result.limit).to.equal(0);
       expect(result.page).to.equal(null);
       expect(result.pagingCounter).to.equal(null);
@@ -370,7 +371,6 @@ describe('mongoose-paginate', function () {
     });
   });
 
-  /*
   it('with $where condition', function () {
     var query = {
       '$where': 'this.price < 100'
@@ -384,20 +384,19 @@ describe('mongoose-paginate', function () {
     };
 
     return Book.paginate(query, options).then((result) => {
-      expect(result.docs).to.have.length(6);
-      expect(result.docs[0].title).to.equal('Book #6');
-      expect(result.totalDocs).to.equal(16);
+      expect(result.docs).to.have.length(10);
+      expect(result.docs[0].title).to.equal('Book #8');
+      expect(result.totalDocs).to.equal(26);
       expect(result.limit).to.equal(10);
       expect(result.page).to.equal(2);
       expect(result.pagingCounter).to.equal(11);
       expect(result.hasPrevPage).to.equal(true);
-      expect(result.hasNextPage).to.equal(false);
+      expect(result.hasNextPage).to.equal(true);
       expect(result.prevPage).to.equal(1);
-      expect(result.nextPage).to.equal(null);
-      expect(result.totalPages).to.equal(2);
+      expect(result.nextPage).to.equal(3);
+      expect(result.totalPages).to.equal(3);
     });
   });
-  */
 
   it('with empty custom labels', function () {
     var query = {
@@ -427,13 +426,13 @@ describe('mongoose-paginate', function () {
 
       expect(result.docs).to.have.length(10);
       expect(result.docs[0].title).to.equal('Book #41');
-      expect(result.totalDocs).to.equal(100);
+      expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(10);
       expect(result.page).to.equal(5);
       expect(result.pagingCounter).to.equal(41);
       expect(result.hasPrevPage).to.equal(true);
       expect(result.hasNextPage).to.equal(true);
-      expect(result.totalPages).to.equal(10);
+      expect(result.totalPages).to.equal(11);
       expect(result.prevPage).to.equal(undefined);
       expect(result.nextPage).to.equal(undefined);
     });
@@ -474,7 +473,7 @@ describe('mongoose-paginate', function () {
     return Book.paginate(query, options).then((result) => {
       expect(result.itemsList).to.have.length(10);
       expect(result.itemsList[0].title).to.equal('Book #41');
-      expect(result.itemCount).to.equal(100);
+      expect(result.itemCount).to.equal(110);
       expect(result.perPage).to.equal(10);
       expect(result.currentPage).to.equal(5);
       expect(result.pageCounter).to.equal(41);
@@ -482,7 +481,7 @@ describe('mongoose-paginate', function () {
       expect(result.hasNext).to.equal(true);
       expect(result.prev).to.equal(4);
       expect(result.next).to.equal(6);
-      expect(result.pageCount).to.equal(10);
+      expect(result.pageCount).to.equal(11);
     });
   });
 
@@ -544,13 +543,13 @@ describe('mongoose-paginate', function () {
         title: 1,
         price: 1
       },
-	    forceCountFn: true,
+      forceCountFn: true,
       customLabels: myCustomLabels
     };
 
     return Book.createIndexes().then(() => {
       return Book.paginate(query, options).then((result) => {
-        expect(result.meta.total).to.equal(110);
+        expect(result.meta.total).to.equal(undefined);
       });
     });
   });
@@ -573,6 +572,7 @@ describe('mongoose-paginate', function () {
             },
           },
         },
+        paginatePopulates: true,
         populateOptions: {
           books: {
             limit: 3,
@@ -602,9 +602,9 @@ describe('mongoose-paginate', function () {
     };
 
     return Book.paginate(query, options).then((result) => {
-      expect(result.docs).to.have.length(100);
-      expect(result.totalDocs).to.equal(100);
-      expect(result.limit).to.equal(100);
+      expect(result.docs).to.have.length(110);
+      expect(result.totalDocs).to.equal(110);
+      expect(result.limit).to.equal(110);
       expect(result.page).to.equal(1);
       expect(result.pagingCounter).to.equal(1);
       expect(result.hasPrevPage).to.equal(false);

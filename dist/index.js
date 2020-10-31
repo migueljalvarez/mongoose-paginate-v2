@@ -30,14 +30,14 @@ var defaultOptions = {
   customLabels: {
     totalDocs: 'totalDocs',
     limit: 'limit',
-    page: 'page',
-    totalPages: 'totalPages',
+    // page: 'page',
+    // totalPages: 'totalPages',
     docs: 'docs',
-    nextPage: 'nextPage',
-    prevPage: 'prevPage',
-    pagingCounter: 'pagingCounter',
-    hasPrevPage: 'hasPrevPage',
-    hasNextPage: 'hasNextPage',
+    // nextPage: 'nextPage',
+    // prevPage: 'prevPage',
+    // pagingCounter: 'pagingCounter',
+    // hasPrevPage: 'hasPrevPage',
+    // hasNextPage: 'hasNextPage',
     meta: null
   },
   collation: {},
@@ -77,32 +77,31 @@ function paginate(query, options, callback) {
   var limit = parseInt(options.limit, 10) > 0 ? parseInt(options.limit, 10) : 0;
   var isCallbackSpecified = typeof callback === 'function';
   var findOptions = options.options;
-  var offset;
-  var page;
+  var offset; // let page;
+
   var skip;
   var docsPromise = []; // Labels
 
   var labelDocs = customLabels.docs;
-  var labelLimit = customLabels.limit;
-  var labelNextPage = customLabels.nextPage;
-  var labelPage = customLabels.page;
-  var labelPagingCounter = customLabels.pagingCounter;
-  var labelPrevPage = customLabels.prevPage;
-  var labelTotal = customLabels.totalDocs;
-  var labelTotalPages = customLabels.totalPages;
-  var labelHasPrevPage = customLabels.hasPrevPage;
-  var labelHasNextPage = customLabels.hasNextPage;
+  var labelLimit = customLabels.limit; // const labelNextPage = customLabels.nextPage;
+  // const labelPage = customLabels.page;
+  // const labelPagingCounter = customLabels.pagingCounter;
+  // const labelPrevPage = customLabels.prevPage;
+
+  var labelTotal = customLabels.totalDocs; // const labelTotalPages = customLabels.totalPages;
+  // const labelHasPrevPage = customLabels.hasPrevPage;
+  // const labelHasNextPage = customLabels.hasNextPage;
+
   var labelMeta = customLabels.meta;
 
   if (Object.prototype.hasOwnProperty.call(options, 'offset')) {
     offset = parseInt(options.offset, 10);
     skip = offset;
-  } else if (Object.prototype.hasOwnProperty.call(options, 'page')) {
-    page = parseInt(options.page, 10);
-    skip = (page - 1) * limit;
+  } else if (Object.prototype.hasOwnProperty.call(options, 'page')) {// page = parseInt(options.page, 10);
+    // skip = (page - 1) * limit;
   } else {
-    offset = 0;
-    page = 1;
+    offset = 0; // page = 1;
+
     skip = offset;
   }
 
@@ -185,56 +184,51 @@ function paginate(query, options, callback) {
     var result = {};
 
     if (typeof offset !== 'undefined') {
-      meta.offset = parseInt(offset, 10);
-      page = Math.ceil((offset + 1) / limit);
-    }
+      meta.offset = parseInt(offset, 10); // page = Math.ceil((offset + 1) / limit);
+    } // const pages = (limit > 0) ? (Math.ceil(count / limit) || 1) : null;
+    // Setting default values
 
-    var pages = limit > 0 ? Math.ceil(count / limit) || 1 : null; // Setting default values
 
-    meta[labelLimit] = parseInt(count, 10);
-    meta[labelTotalPages] = 1;
-    meta[labelPage] = page;
-    meta[labelPagingCounter] = (page - 1) * limit + 1;
-    meta[labelHasPrevPage] = false;
-    meta[labelHasNextPage] = false;
-    meta[labelPrevPage] = null;
-    meta[labelNextPage] = null;
+    meta[labelLimit] = parseInt(count, 10); // meta[labelTotalPages] = 1;
+    // meta[labelPage] = page;
+    // meta[labelPagingCounter] = ((page - 1) * limit) + 1;
+    // meta[labelHasPrevPage] = false;
+    // meta[labelHasNextPage] = false;
+    // meta[labelPrevPage] = null;
+    // meta[labelNextPage] = null;
 
     if (pagination) {
-      meta[labelLimit] = limit;
-      meta[labelTotalPages] = pages; // Set prev page
-
-      if (page > 1) {
-        meta[labelHasPrevPage] = true;
-        meta[labelPrevPage] = page - 1;
-      } else if (page == 1 && typeof offset !== 'undefined' && offset !== 0) {
-        meta[labelHasPrevPage] = true;
-        meta[labelPrevPage] = 1;
-      } else {
-        meta[labelPrevPage] = null;
-      } // Set next page
-
-
-      if (page < pages) {
-        meta[labelHasNextPage] = true;
-        meta[labelNextPage] = page + 1;
-      } else {
-        meta[labelNextPage] = null;
-      }
+      meta[labelLimit] = limit; // meta[labelTotalPages] = pages;
+      // Set prev page
+      // if (page > 1) {
+      //   meta[labelHasPrevPage] = true;
+      //   meta[labelPrevPage] = (page - 1);
+      // } else if (page == 1 && typeof offset !== 'undefined' && offset !== 0) {
+      //   meta[labelHasPrevPage] = true;
+      //   meta[labelPrevPage] = 1;
+      // } else {
+      //   meta[labelPrevPage] = null;
+      // }
+      // Set next page
+      // if (page < pages) {
+      //   meta[labelHasNextPage] = true;
+      //   meta[labelNextPage] = (page + 1);
+      // } else {
+      //   meta[labelNextPage] = null;
+      // }
     } // Remove customLabels set to false
 
 
     delete meta['false'];
 
     if (limit == 0) {
-      meta[labelLimit] = 0;
-      meta[labelTotalPages] = null;
-      meta[labelPage] = null;
-      meta[labelPagingCounter] = null;
-      meta[labelPrevPage] = null;
-      meta[labelNextPage] = null;
-      meta[labelHasPrevPage] = false;
-      meta[labelHasNextPage] = false;
+      meta[labelLimit] = 0; // meta[labelTotalPages] = null;
+      // meta[labelPage] = null;
+      // meta[labelPagingCounter] = null;
+      // meta[labelPrevPage] = null;
+      // meta[labelNextPage] = null;
+      // meta[labelHasPrevPage] = false;
+      // meta[labelHasNextPage] = false;
     }
 
     if (labelMeta) {

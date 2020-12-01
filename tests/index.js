@@ -1,13 +1,16 @@
 'use strict';
 
+/* eslint-disable node/no-unpublished-require */
 let mongoose = require('mongoose');
 let expect = require('chai').expect;
+let assert = require('chai').assert;
+/* eslint-enable node/no-unpublished-require */
 let mongoosePaginate = require('../dist/index');
 
 let MONGO_URI = 'mongodb://localhost/mongoose_paginate_test?authsource=admin';
 
 let AuthorSchema = new mongoose.Schema({
-  name: String
+  name: String,
 });
 
 AuthorSchema.virtual('books', {
@@ -26,13 +29,13 @@ let BookSchema = new mongoose.Schema({
   price: Number,
   author: {
     type: mongoose.Schema.ObjectId,
-    ref: 'Author'
+    ref: 'Author',
   },
-  loc: Object
+  loc: Object,
 });
 
 BookSchema.index({
-  loc: "2dsphere"
+  loc: '2dsphere',
 });
 
 BookSchema.plugin(mongoosePaginate);
@@ -40,17 +43,20 @@ BookSchema.plugin(mongoosePaginate);
 let Book = mongoose.model('Book', BookSchema);
 
 describe('mongoose-paginate', function () {
-
   before(function (done) {
-    mongoose.connect(MONGO_URI, {
-      auth: {
-        user: 'root',
-        password: 'example',
+    mongoose.connect(
+      MONGO_URI,
+      {
+        auth: {
+          user: 'root',
+          password: 'example',
+        },
+        useNewUrlParser: true,
+        useCreateIndex: true,
+        useUnifiedTopology: true,
       },
-      useNewUrlParser: true,
-      useCreateIndex: true,
-      useUnifiedTopology: true,
-    }, done);
+      done
+    );
   });
 
   before(function (done) {
@@ -58,56 +64,56 @@ describe('mongoose-paginate', function () {
   });
 
   before(function () {
-    let book, books = [];
+    let book,
+      books = [];
     let date = new Date();
 
     return Author.create({
-      name: 'Arthur Conan Doyle'
-    }).then(function (author) {
-      for (let i = 1; i <= 100; i++) {
-        book = new Book({
-          // price: Math.floor(Math.random() * (1000 - 50) ) + 50,
-          price: (i * 5) + i,
-          title: 'Book #' + i,
-          date: new Date(date.getTime() + i),
-          author: author._id,
-          loc: {
-            type: "Point",
-            coordinates: [-10.97, 20.77]
-          },
-        });
-        books.push(book);
-      }
-      return Book.create(books);
-    }).then(() => {
-      return Author.create({
-        name: 'William Faulkner'
-      }).then(function (author) {
-        for (let i = 1; i <= 10; i++) {
+      name: 'Arthur Conan Doyle',
+    })
+      .then(function (author) {
+        for (let i = 1; i <= 100; i++) {
           book = new Book({
             // price: Math.floor(Math.random() * (1000 - 50) ) + 50,
-            price: (i * 5) + i,
+            price: i * 5 + i,
             title: 'Book #' + i,
             date: new Date(date.getTime() + i),
             author: author._id,
             loc: {
-              type: "Point",
-              coordinates: [-10.97, 20.77]
+              type: 'Point',
+              coordinates: [-10.97, 20.77],
             },
           });
           books.push(book);
         }
         return Book.create(books);
       })
-    });
+      .then(() => {
+        return Author.create({
+          name: 'William Faulkner',
+        }).then(function (author) {
+          for (let i = 1; i <= 10; i++) {
+            book = new Book({
+              // price: Math.floor(Math.random() * (1000 - 50) ) + 50,
+              price: i * 5 + i,
+              title: 'Book #' + i,
+              date: new Date(date.getTime() + i),
+              author: author._id,
+              loc: {
+                type: 'Point',
+                coordinates: [-10.97, 20.77],
+              },
+            });
+            books.push(book);
+          }
+          return Book.create(books);
+        });
+      });
   });
 
-  afterEach(function () {
-
-  });
+  afterEach(function () {});
 
   it('promise return test', function () {
-
     let promise = Book.paginate();
     expect(promise.then).to.be.an.instanceof(Function);
   });
@@ -122,49 +128,49 @@ describe('mongoose-paginate', function () {
 });
 
 describe('paginates', function () {
-    it('with limit and page', function () {
-      var query = {
-        title: {
-          $in: [/Book #1/i]
-        }
-      };
+  it('with limit and page', function () {
+    var query = {
+      title: {
+        $in: [/Book #1/i],
+      },
+    };
 
-      var options = {
-        limit: 0,
-        sort: {
-          _id: 1
-        },
-        collation: {
-          locale: 'en',
-          strength: 2
-        },
-        lean: true
-      };
-      return Book.paginate(query, options).then((result) => {
-        expect(result.docs).to.have.length(0);
-        expect(result.totalDocs).to.equal(14);
-        expect(result.limit).to.equal(0);
-        // expect(result.page).to.equal(null);
-        // expect(result.pagingCounter).to.equal(null);
-        // expect(result.hasPrevPage).to.equal(false);
-        // expect(result.hasNextPage).to.equal(false);
-        // expect(result.prevPage).to.equal(null);
-        // expect(result.nextPage).to.equal(null);
-        // expect(result.totalPages).to.equal(null);
-      });
+    var options = {
+      limit: 0,
+      sort: {
+        _id: 1,
+      },
+      collation: {
+        locale: 'en',
+        strength: 2,
+      },
+      lean: true,
+    };
+    return Book.paginate(query, options).then((result) => {
+      expect(result.docs).to.have.length(0);
+      expect(result.totalDocs).to.equal(14);
+      expect(result.limit).to.equal(0);
+      // expect(result.page).to.equal(null);
+      // expect(result.pagingCounter).to.equal(null);
+      // expect(result.hasPrevPage).to.equal(false);
+      // expect(result.hasNextPage).to.equal(false);
+      // expect(result.prevPage).to.equal(null);
+      // expect(result.nextPage).to.equal(null);
+      // expect(result.totalPages).to.equal(null);
+    });
   });
 
   it('with page and limit', function () {
     var query = {
       title: {
-        $in: [/Book/i]
-      }
+        $in: [/Book/i],
+      },
     };
 
     var options = {
       limit: 10,
       page: 5,
-      lean: true
+      lean: true,
     };
 
     return Book.paginate(query, options).then((result) => {
@@ -180,8 +186,8 @@ describe('paginates', function () {
       // expect(result.totalPages).to.equal(11);
     });
   });
- 
-  it('first page with page and limit', function() {
+
+  it('first page with page and limit', function () {
     var query = {
       title: {
         $in: [/Book/i],
@@ -194,7 +200,7 @@ describe('paginates', function () {
       lean: true,
     };
 
-    return Book.paginate(query, options).then(result => {
+    return Book.paginate(query, options).then((result) => {
       expect(result.docs).to.have.length(10);
       expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(10);
@@ -208,47 +214,46 @@ describe('paginates', function () {
     });
   });
 
-    it('with empty custom labels', function () {
-      var query = {
-        title: {
-          $in: [/Book/i]
-        }
-      };
+  it('with empty custom labels', function () {
+    var query = {
+      title: {
+        $in: [/Book/i],
+      },
+    };
 
-      const myCustomLabels = {
-        nextPage: false,
-        prevPage: '',
-      };
+    const myCustomLabels = {
+      nextPage: false,
+      prevPage: '',
+    };
 
-      var options = {
-        sort: {
-          _id: 1
-        },
-        limit: 10,
-        offset: 40,
-        select: {
-          title: 1,
-          price: 1
-        },
-        customLabels: myCustomLabels
-      };
-      return Book.paginate(query, options).then((result) => {
-
-        expect(result.docs).to.have.length(10);
-        expect(result.docs[0].title).to.equal('Book #41');
-        expect(result.totalDocs).to.equal(110);
-        expect(result.limit).to.equal(10);
-        // expect(result.page).to.equal(5);
-        // expect(result.pagingCounter).to.equal(41);
-        // expect(result.hasPrevPage).to.equal(true);
-        // expect(result.hasNextPage).to.equal(true);
-        // expect(result.totalPages).to.equal(11);
-        // expect(result.prevPage).to.equal(undefined);
-        // expect(result.nextPage).to.equal(undefined);
-      });
+    var options = {
+      sort: {
+        _id: 1,
+      },
+      limit: 10,
+      offset: 40,
+      select: {
+        title: 1,
+        price: 1,
+      },
+      customLabels: myCustomLabels,
+    };
+    return Book.paginate(query, options).then((result) => {
+      expect(result.docs).to.have.length(10);
+      expect(result.docs[0].title).to.equal('Book #41');
+      expect(result.totalDocs).to.equal(110);
+      expect(result.limit).to.equal(10);
+      // expect(result.page).to.equal(5);
+      // expect(result.pagingCounter).to.equal(41);
+      // expect(result.hasPrevPage).to.equal(true);
+      // expect(result.hasNextPage).to.equal(true);
+      // expect(result.totalPages).to.equal(11);
+      // expect(result.prevPage).to.equal(undefined);
+      // expect(result.nextPage).to.equal(undefined);
+    });
   });
 
-  it('last page with page and limit', function() {
+  it('last page with page and limit', function () {
     var query = {
       title: {
         $in: [/Book/i],
@@ -261,8 +266,8 @@ describe('paginates', function () {
       lean: true,
     };
 
-    return Book.paginate(query, options).then(result => {
-			expect(result.docs).to.have.length(10);
+    return Book.paginate(query, options).then((result) => {
+      expect(result.docs).to.have.length(10);
       expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(10);
       // expect(result.page).to.equal(10);
@@ -278,21 +283,20 @@ describe('paginates', function () {
   it('with offset and limit (not page)', function () {
     var query = {
       title: {
-        $in: [/Book/i]
-      }
+        $in: [/Book/i],
+      },
     };
 
     var options = {
       limit: 10,
       offset: 98,
       sort: {
-        _id: 1
+        _id: 1,
       },
-      lean: true
+      lean: true,
     };
 
     return Book.paginate(query, options).then((result) => {
-
       expect(result.docs).to.have.length(10);
       expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(10);
@@ -305,25 +309,24 @@ describe('paginates', function () {
       // expect(result.totalPages).to.equal(11);
     });
   });
-  
+
   it('with offset and limit (not page) condition: offset > 0 < limit', function () {
     var query = {
       title: {
-        $in: [/Book/i]
-      }
+        $in: [/Book/i],
+      },
     };
 
     var options = {
       limit: 10,
       offset: 5,
       sort: {
-        _id: 1
+        _id: 1,
       },
-      lean: true
+      lean: true,
     };
 
     return Book.paginate(query, options).then((result) => {
-
       expect(result.docs).to.have.length(10);
       expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(10);
@@ -340,24 +343,23 @@ describe('paginates', function () {
   it('with limit=0 (metadata only)', function () {
     var query = {
       title: {
-        $in: [/Book #1/i]
-      }
+        $in: [/Book #1/i],
+      },
     };
 
     var options = {
       limit: 0,
       sort: {
-        _id: 1
+        _id: 1,
       },
       collation: {
         locale: 'en',
-        strength: 2
+        strength: 2,
       },
-      lean: true
+      lean: true,
     };
 
     return Book.paginate(query, options).then((result) => {
-
       expect(result.docs).to.have.length(0);
       expect(result.totalDocs).to.equal(14);
       expect(result.limit).to.equal(0);
@@ -373,14 +375,14 @@ describe('paginates', function () {
 
   it('with $where condition', function () {
     var query = {
-      '$where': 'this.price < 100'
+      $where: 'this.price < 100',
     };
 
     var options = {
       sort: {
-        price: -1
+        price: -1,
       },
-      offset: 10
+      offset: 10,
     };
 
     return Book.paginate(query, options).then((result) => {
@@ -401,8 +403,8 @@ describe('paginates', function () {
   it('with empty custom labels', function () {
     var query = {
       title: {
-        $in: [/Book/i]
-      }
+        $in: [/Book/i],
+      },
     };
 
     const myCustomLabels = {
@@ -412,18 +414,17 @@ describe('paginates', function () {
 
     var options = {
       sort: {
-        _id: 1
+        _id: 1,
       },
       limit: 10,
       offset: 40,
       select: {
         title: 1,
-        price: 1
+        price: 1,
       },
-      customLabels: myCustomLabels
+      customLabels: myCustomLabels,
     };
     return Book.paginate(query, options).then((result) => {
-
       expect(result.docs).to.have.length(10);
       expect(result.docs[0].title).to.equal('Book #41');
       expect(result.totalDocs).to.equal(110);
@@ -441,8 +442,8 @@ describe('paginates', function () {
   it('with custom labels', function () {
     var query = {
       title: {
-        $in: [/Book/i]
-      }
+        $in: [/Book/i],
+      },
     };
 
     const myCustomLabels = {
@@ -455,20 +456,20 @@ describe('paginates', function () {
       totalPages: 'pageCount',
       pagingCounter: 'pageCounter',
       hasPrevPage: 'hasPrevious',
-      hasNextPage: 'hasNext'
+      hasNextPage: 'hasNext',
     };
 
     var options = {
       sort: {
-        _id: 1
+        _id: 1,
       },
       limit: 10,
       offset: 40,
       select: {
         title: 1,
-        price: 1
+        price: 1,
       },
-      customLabels: myCustomLabels
+      customLabels: myCustomLabels,
     };
     return Book.paginate(query, options).then((result) => {
       expect(result.itemsList).to.have.length(10);
@@ -488,27 +489,27 @@ describe('paginates', function () {
   it('with custom Meta label', function () {
     var query = {
       title: {
-        $in: [/Book/i]
-      }
+        $in: [/Book/i],
+      },
     };
 
     const myCustomLabels = {
       meta: 'meta',
       docs: 'itemsList',
-      totalDocs: 'total'
+      totalDocs: 'total',
     };
 
     var options = {
       sort: {
-        _id: 1
+        _id: 1,
       },
       limit: 10,
       offset: 40,
       select: {
         title: 1,
-        price: 1
+        price: 1,
       },
-      customLabels: myCustomLabels
+      customLabels: myCustomLabels,
     };
     return Book.paginate(query, options).then((result) => {
       expect(result.itemsList).to.have.length(10);
@@ -521,30 +522,28 @@ describe('paginates', function () {
   it('2dsphere', function () {
     var query = {
       loc: {
-        $nearSphere: 
-          [ 50, 50 ]
-        
-      }
+        $nearSphere: [50, 50],
+      },
     };
 
     const myCustomLabels = {
       meta: 'meta',
       docs: 'itemsList',
-      totalDocs: 'total'
+      totalDocs: 'total',
     };
 
     var options = {
       sort: {
-        _id: 1
+        _id: 1,
       },
       limit: 10,
       page: 5,
       select: {
         title: 1,
-        price: 1
+        price: 1,
       },
       forceCountFn: true,
-      customLabels: myCustomLabels
+      customLabels: myCustomLabels,
     };
 
     return Book.createIndexes().then(() => {
@@ -555,50 +554,50 @@ describe('paginates', function () {
   });
 
   it('with populate', function () {
-      var query = {};
+    var query = {};
 
-      var options = {
-        limit: 1,
-        offset: 1,
-        collation: {
-          locale: 'en',
-          strength: 2
-        },
-        populate: {
-          path: 'books',
-          options: {
-            sort: {
-              _id: 1
-            },
+    var options = {
+      limit: 1,
+      offset: 1,
+      collation: {
+        locale: 'en',
+        strength: 2,
+      },
+      populate: {
+        path: 'books',
+        options: {
+          sort: {
+            _id: 1,
           },
         },
-        paginatePopulates: true,
-        populateOptions: {
-          books: {
-            limit: 3,
-            offset: 8,
-          },
+      },
+      paginatePopulates: true,
+      populateOptions: {
+        books: {
+          limit: 3,
+          offset: 8,
         },
-        lean: true
-      };
+      },
+      lean: true,
+    };
 
-      return Author.paginate(query, options).then((result) => {
-        expect(result.docs).to.have.length(1);
-        expect(result.totalDocs).to.equal(2);
-        expect(result.docs[0].books.docs).to.have.length(2);
-        expect(result.docs[0].books.totalDocs).to.equal(10);
-      });
+    return Author.paginate(query, options).then((result) => {
+      expect(result.docs).to.have.length(1);
+      expect(result.totalDocs).to.equal(2);
+      expect(result.docs[0].books.docs).to.have.length(2);
+      expect(result.docs[0].books.totalDocs).to.equal(10);
+    });
   });
 
   it('all data (without pagination)', function () {
     var query = {
       title: {
-        $in: [/Book/i]
-      }
+        $in: [/Book/i],
+      },
     };
 
     var options = {
-      pagination: false
+      pagination: false,
     };
 
     return Book.paginate(query, options).then((result) => {
@@ -612,7 +611,15 @@ describe('paginates', function () {
       // expect(result.prevPage).to.equal(null);
       // expect(result.nextPage).to.equal(null);
       // expect(result.totalPages).to.equal(1);
+    });
+  });
 
+  it('estimated count works', function (done) {
+    Book.paginate({}, { useEstimatedCount: true }, function (err, result) {
+      expect(err).to.be.null;
+      expect(result).to.be.an.instanceOf(Object);
+      assert.isNumber(result.totalDocs, 'totalDocs is a number');
+      done();
     });
   });
 
@@ -623,5 +630,4 @@ describe('paginates', function () {
   after(function (done) {
     mongoose.disconnect(done);
   });
-
 });

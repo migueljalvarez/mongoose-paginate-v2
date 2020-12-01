@@ -13,6 +13,7 @@
  * @param {Number}              [options.offset=0] - Use offset or page to set skip position
  * @param {Number}              [options.page=1]
  * @param {Number}              [options.limit=10]
+ * @param {Boolean}             [options.useEstimatedCount=true] - Enable estimatedDocumentCount for larger datasets. As the name says, the count may not abe accurate.
  * @param {Object}              [options.read={}] - Determines the MongoDB nodes from which to read.
  * @param {Function}            [callback]
  *
@@ -42,6 +43,7 @@ const defaultOptions = {
   select: '',
   options: {},
   pagination: true,
+  useEstimatedCount: false,
   forceCountFn: false,
   customFind: 'find',
 };
@@ -50,7 +52,7 @@ function paginate(query, options, callback) {
   options = {
     ...defaultOptions,
     ...paginate.options,
-    ...options
+    ...options,
   };
   query = query || {};
 
@@ -65,16 +67,18 @@ function paginate(query, options, callback) {
     select,
     sort,
     pagination,
+    useEstimatedCount,
     forceCountFn,
     customFind,
   } = options;
 
   const customLabels = {
     ...defaultOptions.customLabels,
-    ...options.customLabels
+    ...options.customLabels,
   };
 
-  const limit = parseInt(options.limit, 10) > 0 ? parseInt(options.limit, 10) : 0;
+  const limit =
+    parseInt(options.limit, 10) > 0 ? parseInt(options.limit, 10) : 0;
 
   const isCallbackSpecified = typeof callback === 'function';
   const findOptions = options.options;
@@ -113,9 +117,14 @@ function paginate(query, options, callback) {
   let countPromise;
 
   if (forceCountFn === true) {
+    // Deprecated since starting from MongoDB Node.JS driver v3.1
     countPromise = this.estimatedDocumentCount(query).exec();
   } else {
-    countPromise = this[customFind](query).exec();
+    if (useEstimatedCount === true) {
+      countPromise = this.estimatedDocumentCount().exec();
+    } else {
+      countPromise = this[customFind](query).exec();
+    }
   }
 
   if (limit) {
@@ -152,42 +161,53 @@ function paginate(query, options, callback) {
     if (lean && leanWithId) {
       docsPromise = docsPromise.then((docs) => {
         docs.forEach((doc) => {
-          doc.id = String(doc._id);
+          if (doc._id) {
+            doc.id = String(doc._id);
+          }
         });
         return docs;
       });
     }
-
   }
 
   return Promise.all([countPromise, docsPromise])
     .then((values) => {
-
       // const [count, docs] = values;
 
       const count = values[0].length;
       const docs = values[1];
 
       if (paginatePopulates) {
-        if(populate && Array.isArray(populate)) {
+        if (populate && Array.isArray(populate)) {
           for (let j = 0; j < docs.length; j++) {
             for (let i = 0; i < populate.length; i++) {
-              if (populate[i] && populate[i].path && !this.schema.virtuals[populate[i].path].options.justOne) {
+              if (
+                populate[i] &&
+                populate[i].path &&
+                !this.schema.virtuals[populate[i].path].options.justOne
+              ) {
                 const documentObject = docs[j].toObject();
                 documentObject[populate[i].path] = undefined;
-                documentObject[populate[i].path] = paginatePopulate(docs[j][populate[i].path], options.populateOptions && options.populateOptions[populate[i].path]);
+                documentObject[populate[i].path] = paginatePopulate(
+                  docs[j][populate[i].path],
+                  options.populateOptions &&
+                    options.populateOptions[populate[i].path]
+                );
                 docs[j] = documentObject;
               }
             }
           }
-        } else if(populate && typeof populate === 'object') {
+        } else if (populate && typeof populate === 'object') {
           for (let i = 0; i < docs.length; i++) {
-            docs[i][populate.path] = paginatePopulate(docs[i][populate.path], options.populateOptions && options.populateOptions[populate.path]);
+            docs[i][populate.path] = paginatePopulate(
+              docs[i][populate.path],
+              options.populateOptions && options.populateOptions[populate.path]
+            );
           }
         }
       }
       const meta = {
-        [labelTotal]: count
+        [labelTotal]: count,
       };
 
       let result = {};
@@ -197,13 +217,13 @@ function paginate(query, options, callback) {
         // page = Math.ceil((offset + 1) / limit);
       }
 
-      // const pages = (limit > 0) ? (Math.ceil(count / limit) || 1) : null;
+      // const pages = limit > 0 ? Math.ceil(count / limit) || 1 : null;
 
       // Setting default values
       meta[labelLimit] = parseInt(count, 10);
       // meta[labelTotalPages] = 1;
       // meta[labelPage] = page;
-      // meta[labelPagingCounter] = ((page - 1) * limit) + 1;
+      // meta[labelPagingCounter] = (page - 1) * limit + 1;
 
       // meta[labelHasPrevPage] = false;
       // meta[labelHasNextPage] = false;
@@ -211,14 +231,13 @@ function paginate(query, options, callback) {
       // meta[labelNextPage] = null;
 
       if (pagination) {
-
         meta[labelLimit] = limit;
         // meta[labelTotalPages] = pages;
 
         // Set prev page
         // if (page > 1) {
         //   meta[labelHasPrevPage] = true;
-        //   meta[labelPrevPage] = (page - 1);
+        //   meta[labelPrevPage] = page - 1;
         // } else if (page == 1 && typeof offset !== 'undefined' && offset !== 0) {
         //   meta[labelHasPrevPage] = true;
         //   meta[labelPrevPage] = 1;
@@ -229,11 +248,10 @@ function paginate(query, options, callback) {
         // Set next page
         // if (page < pages) {
         //   meta[labelHasNextPage] = true;
-        //   meta[labelNextPage] = (page + 1);
+        //   meta[labelNextPage] = page + 1;
         // } else {
         //   meta[labelNextPage] = null;
         // }
-
       }
 
       // Remove customLabels set to false
@@ -253,24 +271,25 @@ function paginate(query, options, callback) {
       if (labelMeta) {
         result = {
           [labelDocs]: docs,
-          [labelMeta]: meta
+          [labelMeta]: meta,
         };
       } else {
         result = {
           [labelDocs]: docs,
-          ...meta
+          ...meta,
         };
       }
-      return isCallbackSpecified ? callback(null, result) : Promise.resolve(result);
-    }).catch((error) => {
+
+      return isCallbackSpecified
+        ? callback(null, result)
+        : Promise.resolve(result);
+    })
+    .catch((error) => {
       return isCallbackSpecified ? callback(error) : Promise.reject(error);
     });
 }
 
-function paginatePopulate(populateArray = [], {
-  limit = 10,
-  offset = 0,
-} = {}) {
+function paginatePopulate(populateArray = [], { limit = 10, offset = 0 } = {}) {
   const customLabels = {
     ...defaultOptions.customLabels,
   };
@@ -298,12 +317,12 @@ function paginatePopulate(populateArray = [], {
   if (labelMeta) {
     result = {
       [labelDocs]: docs,
-      [labelMeta]: meta
+      [labelMeta]: meta,
     };
   } else {
     result = {
       [labelDocs]: docs,
-      ...meta
+      ...meta,
     };
   }
   return result;

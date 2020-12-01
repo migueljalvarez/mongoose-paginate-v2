@@ -1,6 +1,7 @@
-'use strict'
+'use strict';
 
 module.exports = {
+  root: true,
   parser: 'babel-eslint',
   extends: ['eslint:recommended', 'plugin:node/recommended'],
   env: {
@@ -28,4 +29,4 @@ module.exports = {
       },
     },
   ],
-}
+};

@@ -216,7 +216,7 @@ function paginate(query, options, callback) {
   return Promise.all([countPromise, docsPromise])
     .then(function (values) {
       // const [count, docs] = values;
-      var count = values[0].length;
+      var count = values[0].length || values[0];
       var docs = values[1];
 
       if (paginatePopulates) {

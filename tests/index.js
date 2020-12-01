@@ -519,39 +519,39 @@ describe('paginates', function () {
     });
   });
 
-  it('2dsphere', function () {
-    var query = {
-      loc: {
-        $nearSphere: [50, 50],
-      },
-    };
-
-    const myCustomLabels = {
-      meta: 'meta',
-      docs: 'itemsList',
-      totalDocs: 'total',
-    };
-
-    var options = {
-      sort: {
-        _id: 1,
-      },
-      limit: 10,
-      page: 5,
-      select: {
-        title: 1,
-        price: 1,
-      },
-      forceCountFn: true,
-      customLabels: myCustomLabels,
-    };
-
-    return Book.createIndexes().then(() => {
-      return Book.paginate(query, options).then((result) => {
-        expect(result.meta.total).to.equal(undefined);
-      });
-    });
-  });
+  // it('2dsphere', function () {
+  //   var query = {
+  //     loc: {
+  //       $nearSphere: [50, 50],
+  //     },
+  //   };
+  //
+  //   const myCustomLabels = {
+  //     meta: 'meta',
+  //     docs: 'itemsList',
+  //     totalDocs: 'total',
+  //   };
+  //
+  //   var options = {
+  //     sort: {
+  //       _id: 1,
+  //     },
+  //     limit: 10,
+  //     page: 5,
+  //     select: {
+  //       title: 1,
+  //       price: 1,
+  //     },
+  //     forceCountFn: true,
+  //     customLabels: myCustomLabels,
+  //   };
+  //
+  //   return Book.createIndexes().then(() => {
+  //     return Book.paginate(query, options).then((result) => {
+  //       expect(result.meta.total).to.equal(undefined);
+  //     });
+  //   });
+  // });
 
   it('with populate', function () {
     var query = {};

@@ -144,13 +144,13 @@ describe('paginates', function () {
         expect(result.docs).to.have.length(0);
         expect(result.totalDocs).to.equal(14);
         expect(result.limit).to.equal(0);
-        expect(result.page).to.equal(null);
-        expect(result.pagingCounter).to.equal(null);
-        expect(result.hasPrevPage).to.equal(false);
-        expect(result.hasNextPage).to.equal(false);
-        expect(result.prevPage).to.equal(null);
-        expect(result.nextPage).to.equal(null);
-        expect(result.totalPages).to.equal(null);
+        // expect(result.page).to.equal(null);
+        // expect(result.pagingCounter).to.equal(null);
+        // expect(result.hasPrevPage).to.equal(false);
+        // expect(result.hasNextPage).to.equal(false);
+        // expect(result.prevPage).to.equal(null);
+        // expect(result.nextPage).to.equal(null);
+        // expect(result.totalPages).to.equal(null);
       });
   });
 
@@ -171,13 +171,13 @@ describe('paginates', function () {
       expect(result.docs).to.have.length(10);
       expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(10);
-      expect(result.page).to.equal(5);
-      expect(result.pagingCounter).to.equal(41);
-      expect(result.hasPrevPage).to.equal(true);
-      expect(result.hasNextPage).to.equal(true);
-      expect(result.prevPage).to.equal(4);
-      expect(result.nextPage).to.equal(6);
-      expect(result.totalPages).to.equal(11);
+      // expect(result.page).to.equal(5);
+      // expect(result.pagingCounter).to.equal(41);
+      // expect(result.hasPrevPage).to.equal(true);
+      // expect(result.hasNextPage).to.equal(true);
+      // expect(result.prevPage).to.equal(4);
+      // expect(result.nextPage).to.equal(6);
+      // expect(result.totalPages).to.equal(11);
     });
   });
  
@@ -198,13 +198,13 @@ describe('paginates', function () {
       expect(result.docs).to.have.length(10);
       expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(10);
-      expect(result.page).to.equal(1);
-      expect(result.pagingCounter).to.equal(1);
-      expect(result.hasPrevPage).to.equal(false);
-      expect(result.hasNextPage).to.equal(true);
-      expect(result.prevPage).to.equal(null);
-      expect(result.nextPage).to.equal(2);
-      expect(result.totalPages).to.equal(11);
+      // expect(result.page).to.equal(1);
+      // expect(result.pagingCounter).to.equal(1);
+      // expect(result.hasPrevPage).to.equal(false);
+      // expect(result.hasNextPage).to.equal(true);
+      // expect(result.prevPage).to.equal(null);
+      // expect(result.nextPage).to.equal(2);
+      // expect(result.totalPages).to.equal(11);
     });
   });
 
@@ -225,7 +225,7 @@ describe('paginates', function () {
           _id: 1
         },
         limit: 10,
-        page: 5,
+        offset: 40,
         select: {
           title: 1,
           price: 1
@@ -238,13 +238,13 @@ describe('paginates', function () {
         expect(result.docs[0].title).to.equal('Book #41');
         expect(result.totalDocs).to.equal(110);
         expect(result.limit).to.equal(10);
-        expect(result.page).to.equal(5);
-        expect(result.pagingCounter).to.equal(41);
-        expect(result.hasPrevPage).to.equal(true);
-        expect(result.hasNextPage).to.equal(true);
-        expect(result.totalPages).to.equal(11);
-        expect(result.prevPage).to.equal(undefined);
-        expect(result.nextPage).to.equal(undefined);
+        // expect(result.page).to.equal(5);
+        // expect(result.pagingCounter).to.equal(41);
+        // expect(result.hasPrevPage).to.equal(true);
+        // expect(result.hasNextPage).to.equal(true);
+        // expect(result.totalPages).to.equal(11);
+        // expect(result.prevPage).to.equal(undefined);
+        // expect(result.nextPage).to.equal(undefined);
       });
   });
 
@@ -265,13 +265,13 @@ describe('paginates', function () {
 			expect(result.docs).to.have.length(10);
       expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(10);
-      expect(result.page).to.equal(10);
-      expect(result.pagingCounter).to.equal(91);
-      expect(result.hasPrevPage).to.equal(true);
-      expect(result.hasNextPage).to.equal(true);
-      expect(result.prevPage).to.equal(9);
-      expect(result.nextPage).to.equal(11);
-      expect(result.totalPages).to.equal(11);
+      // expect(result.page).to.equal(10);
+      // expect(result.pagingCounter).to.equal(91);
+      // expect(result.hasPrevPage).to.equal(true);
+      // expect(result.hasNextPage).to.equal(true);
+      // expect(result.prevPage).to.equal(9);
+      // expect(result.nextPage).to.equal(11);
+      // expect(result.totalPages).to.equal(11);
     });
   });
 
@@ -296,13 +296,13 @@ describe('paginates', function () {
       expect(result.docs).to.have.length(10);
       expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(10);
-      expect(result.page).to.equal(10);
-      expect(result.pagingCounter).to.equal(91);
-      expect(result.hasPrevPage).to.equal(true);
-      expect(result.hasNextPage).to.equal(true);
-      expect(result.prevPage).to.equal(9);
-      expect(result.nextPage).to.equal(11);
-      expect(result.totalPages).to.equal(11);
+      // expect(result.page).to.equal(10);
+      // expect(result.pagingCounter).to.equal(91);
+      // expect(result.hasPrevPage).to.equal(true);
+      // expect(result.hasNextPage).to.equal(true);
+      // expect(result.prevPage).to.equal(9);
+      // expect(result.nextPage).to.equal(11);
+      // expect(result.totalPages).to.equal(11);
     });
   });
   
@@ -327,13 +327,13 @@ describe('paginates', function () {
       expect(result.docs).to.have.length(10);
       expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(10);
-      expect(result.page).to.equal(1);
-      expect(result.pagingCounter).to.equal(1);
-      expect(result.hasPrevPage).to.equal(true);
-      expect(result.hasNextPage).to.equal(true);
-      expect(result.prevPage).to.equal(1);
-      expect(result.nextPage).to.equal(2);
-      expect(result.totalPages).to.equal(11);
+      // expect(result.page).to.equal(1);
+      // expect(result.pagingCounter).to.equal(1);
+      // expect(result.hasPrevPage).to.equal(true);
+      // expect(result.hasNextPage).to.equal(true);
+      // expect(result.prevPage).to.equal(1);
+      // expect(result.nextPage).to.equal(2);
+      // expect(result.totalPages).to.equal(11);
     });
   });
 
@@ -361,13 +361,13 @@ describe('paginates', function () {
       expect(result.docs).to.have.length(0);
       expect(result.totalDocs).to.equal(14);
       expect(result.limit).to.equal(0);
-      expect(result.page).to.equal(null);
-      expect(result.pagingCounter).to.equal(null);
-      expect(result.hasPrevPage).to.equal(false);
-      expect(result.hasNextPage).to.equal(false);
-      expect(result.prevPage).to.equal(null);
-      expect(result.nextPage).to.equal(null);
-      expect(result.totalPages).to.equal(null);
+      // expect(result.page).to.equal(null);
+      // expect(result.pagingCounter).to.equal(null);
+      // expect(result.hasPrevPage).to.equal(false);
+      // expect(result.hasNextPage).to.equal(false);
+      // expect(result.prevPage).to.equal(null);
+      // expect(result.nextPage).to.equal(null);
+      // expect(result.totalPages).to.equal(null);
     });
   });
 
@@ -380,7 +380,7 @@ describe('paginates', function () {
       sort: {
         price: -1
       },
-      page: 2
+      offset: 10
     };
 
     return Book.paginate(query, options).then((result) => {
@@ -388,13 +388,13 @@ describe('paginates', function () {
       expect(result.docs[0].title).to.equal('Book #8');
       expect(result.totalDocs).to.equal(26);
       expect(result.limit).to.equal(10);
-      expect(result.page).to.equal(2);
-      expect(result.pagingCounter).to.equal(11);
-      expect(result.hasPrevPage).to.equal(true);
-      expect(result.hasNextPage).to.equal(true);
-      expect(result.prevPage).to.equal(1);
-      expect(result.nextPage).to.equal(3);
-      expect(result.totalPages).to.equal(3);
+      // expect(result.page).to.equal(2);
+      // expect(result.pagingCounter).to.equal(11);
+      // expect(result.hasPrevPage).to.equal(true);
+      // expect(result.hasNextPage).to.equal(true);
+      // expect(result.prevPage).to.equal(1);
+      // expect(result.nextPage).to.equal(3);
+      // expect(result.totalPages).to.equal(3);
     });
   });
 
@@ -415,7 +415,7 @@ describe('paginates', function () {
         _id: 1
       },
       limit: 10,
-      page: 5,
+      offset: 40,
       select: {
         title: 1,
         price: 1
@@ -428,13 +428,13 @@ describe('paginates', function () {
       expect(result.docs[0].title).to.equal('Book #41');
       expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(10);
-      expect(result.page).to.equal(5);
-      expect(result.pagingCounter).to.equal(41);
-      expect(result.hasPrevPage).to.equal(true);
-      expect(result.hasNextPage).to.equal(true);
-      expect(result.totalPages).to.equal(11);
-      expect(result.prevPage).to.equal(undefined);
-      expect(result.nextPage).to.equal(undefined);
+      // expect(result.page).to.equal(5);
+      // expect(result.pagingCounter).to.equal(41);
+      // expect(result.hasPrevPage).to.equal(true);
+      // expect(result.hasNextPage).to.equal(true);
+      // expect(result.totalPages).to.equal(11);
+      // expect(result.prevPage).to.equal(undefined);
+      // expect(result.nextPage).to.equal(undefined);
     });
   });
 
@@ -463,7 +463,7 @@ describe('paginates', function () {
         _id: 1
       },
       limit: 10,
-      page: 5,
+      offset: 40,
       select: {
         title: 1,
         price: 1
@@ -475,13 +475,13 @@ describe('paginates', function () {
       expect(result.itemsList[0].title).to.equal('Book #41');
       expect(result.itemCount).to.equal(110);
       expect(result.perPage).to.equal(10);
-      expect(result.currentPage).to.equal(5);
-      expect(result.pageCounter).to.equal(41);
-      expect(result.hasPrevious).to.equal(true);
-      expect(result.hasNext).to.equal(true);
-      expect(result.prev).to.equal(4);
-      expect(result.next).to.equal(6);
-      expect(result.pageCount).to.equal(11);
+      // expect(result.currentPage).to.equal(5);
+      // expect(result.pageCounter).to.equal(41);
+      // expect(result.hasPrevious).to.equal(true);
+      // expect(result.hasNext).to.equal(true);
+      // expect(result.prev).to.equal(4);
+      // expect(result.next).to.equal(6);
+      // expect(result.pageCount).to.equal(11);
     });
   });
 
@@ -503,7 +503,7 @@ describe('paginates', function () {
         _id: 1
       },
       limit: 10,
-      page: 5,
+      offset: 40,
       select: {
         title: 1,
         price: 1
@@ -605,13 +605,13 @@ describe('paginates', function () {
       expect(result.docs).to.have.length(110);
       expect(result.totalDocs).to.equal(110);
       expect(result.limit).to.equal(110);
-      expect(result.page).to.equal(1);
-      expect(result.pagingCounter).to.equal(1);
-      expect(result.hasPrevPage).to.equal(false);
-      expect(result.hasNextPage).to.equal(false);
-      expect(result.prevPage).to.equal(null);
-      expect(result.nextPage).to.equal(null);
-      expect(result.totalPages).to.equal(1);
+      // expect(result.page).to.equal(1);
+      // expect(result.pagingCounter).to.equal(1);
+      // expect(result.hasPrevPage).to.equal(false);
+      // expect(result.hasNextPage).to.equal(false);
+      // expect(result.prevPage).to.equal(null);
+      // expect(result.nextPage).to.equal(null);
+      // expect(result.totalPages).to.equal(1);
 
     });
   });

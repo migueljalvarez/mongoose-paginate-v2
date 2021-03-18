@@ -53,7 +53,6 @@
     "url": "https://github.com/aravindnc/mongoose-paginate-v2/issues"
   },
   "homepage": "https://github.com/aravindnc/mongoose-paginate-v2#readme",
-  "dependencies": {},
   "devDependencies": {
     "@babel/cli": "^7.12.1",
     "@babel/core": "^7.12.3",

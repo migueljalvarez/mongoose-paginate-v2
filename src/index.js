@@ -174,7 +174,7 @@ function paginate(query, options, callback) {
     .then((values) => {
       // const [count, docs] = values;
 
-      const count = values[0].length || values[0];
+      const count = values[0].length ?? values[0];
       const docs = values[1];
 
       if (paginatePopulates) {

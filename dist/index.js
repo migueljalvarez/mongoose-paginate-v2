@@ -215,8 +215,14 @@ function paginate(query, options, callback) {
 
   return Promise.all([countPromise, docsPromise])
     .then(function (values) {
+      var _values$0$length;
+
       // const [count, docs] = values;
-      var count = values[0].length || values[0];
+      var count =
+        (_values$0$length = values[0].length) !== null &&
+        _values$0$length !== void 0
+          ? _values$0$length
+          : values[0];
       var docs = values[1];
 
       if (paginatePopulates) {

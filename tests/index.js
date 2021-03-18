@@ -42,6 +42,14 @@ BookSchema.plugin(mongoosePaginate);
 
 let Book = mongoose.model('Book', BookSchema);
 
+let ZeroSchema = new mongoose.Schema({
+  name: String,
+});
+
+ZeroSchema.plugin(mongoosePaginate);
+
+let Zero = mongoose.model('Zero', ZeroSchema);
+
 describe('mongoose-paginate', function () {
   before(function (done) {
     mongoose.connect(
@@ -616,6 +624,15 @@ describe('paginates', function () {
 
   it('estimated count works', function (done) {
     Book.paginate({}, { useEstimatedCount: true }, function (err, result) {
+      expect(err).to.be.null;
+      expect(result).to.be.an.instanceOf(Object);
+      assert.isNumber(result.totalDocs, 'totalDocs is a number');
+      done();
+    });
+  });
+
+  it('count with 0 documents', function (done) {
+    Zero.paginate({}, {}, function (err, result) {
       expect(err).to.be.null;
       expect(result).to.be.an.instanceOf(Object);
       assert.isNumber(result.totalDocs, 'totalDocs is a number');

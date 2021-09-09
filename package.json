@@ -7,7 +7,7 @@
     "pretest": "npm run build",
     "build": "babel src -d dist",
     "lint": "./node_modules/.bin/eslint \"tests\" \"src\" \".eslintrc.js\" --fix",
-    "prettier": "./node_modules/.bin/prettier --write \"{src,tests}/**/*.js\" \"*.md\"",
+    "prettier": "./node_modules/.bin/prettier --write \"{src,tests}/**/*.js\" \"*.md\""
   },
   "husky": {
     "hooks": {
